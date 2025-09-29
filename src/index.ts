@@ -12,7 +12,6 @@ const port = process.env.PORT || 5000;
 
 const app = express();
 
-app.set("trust proxy", 1);
 connectDB();
 
 const limiter = rateLimit({
@@ -23,7 +22,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use("/api", limiter);
+app.use("/api/chat", limiter);
 
 app.use(bodyParser.json());
 

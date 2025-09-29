@@ -22,7 +22,6 @@ export const getChatResponse = async (
   message: string,
   chatId?: string
 ): Promise<ChatResponse> => {
-  const systemPrompt = getPrompts();
   let history = [];
 
   if (chatId) {
@@ -41,7 +40,7 @@ export const getChatResponse = async (
   }
 
   const fullMessages: ChatCompletionMessageParam[] = [
-    { role: "system", content: systemPrompt },
+    { role: "system", content: getPrompts(history) },
     ...(history
       .map((msg) => {
         let content =
