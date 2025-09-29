@@ -6,14 +6,14 @@ const chatRouter = express.Router();
 
 chatRouter.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { messages } = req.body;
-
+    const { messages, chatId } = req.body;
+    console.log(req.body);
     if (!messages || messages.length === 0) {
       res.status(400).json({ error: "Messages are required" });
       return;
     }
 
-    const response = await getChatResponse(messages, req);
+    const response = await getChatResponse(messages, chatId);
 
     res.json(response);
   } catch (error) {
@@ -22,14 +22,28 @@ chatRouter.post("/", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-chatRouter.get('/history', async (req: Request, res: Response): Promise<void> => {
+chatRouter.get(
+  "/history/:chatId",
+  async (req: Request, res: Response): Promise<void> => {
     try {
-        const history = await Chat.find().sort({ createdAt: -1 });
-        res.json(history);
+      const chatId = req.params;
+      const history = await Chat.findOne(chatId).select("choices").lean();
+      if (!history) {
+        res.status(404).json({ error: "Conversation not found" });
+      }
+
+      res.json({
+        chatId: chatId.chatId,
+        conversation: history?.choices,
+        total_messages: Array.isArray(history?.choices)
+          ? history?.choices.length
+          : 0,
+      });
     } catch (error) {
-        console.error("Chat history error:", error);
-        res.status(500).json({ error: "Failed to fetch chat history" });
+      console.error("Chat history error:", error);
+      res.status(500).json({ error: "Failed to fetch chat history" });
     }
-})
+  }
+);
 
 export default chatRouter;
