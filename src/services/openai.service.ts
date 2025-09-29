@@ -1,10 +1,10 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat";
-import { Request } from "express";
 import openai from "../config/openai";
 import { pineconeIndex, pineconeShopIndex } from "../config/pinecone";
-import Chat from "../database/models/chats";
-import { Message, saveChatMessage } from "./chat.service";
 import getPrompts from "../constant/prompts";
+import Chat from "../database/models/chats";
+import { saveChatMessage } from "./chat.service";
+import { error } from "console";
 
 export interface ChatResponse {
   role: "assistant";
@@ -16,6 +16,74 @@ const embeddingCache = new Map<string, number[]>();
 
 const trimMessages = (messages: ChatCompletionMessageParam[]) => {
   return messages.slice(Math.max(messages.length - 10, 0));
+};
+
+export const getChatResponse = async (
+  message: string,
+  chatId?: string
+): Promise<ChatResponse> => {
+  const systemPrompt = getPrompts();
+  let history = [];
+
+  if (chatId) {
+    const chat = await Chat.findOne({ chatId });
+    if (!chat) {
+      return {
+        role: "assistant",
+        content: "chat Id does not exist",
+        id: chatId,
+      };
+    }
+
+    if (chat?.choices) {
+      history = chat.choices;
+    }
+  }
+
+  const fullMessages: ChatCompletionMessageParam[] = [
+    { role: "system", content: systemPrompt },
+    ...(history
+      .map((msg) => {
+        let content =
+          msg.message ||
+          (Array.isArray(msg.messages) ? msg.messages[0] : "") ||
+          "";
+
+        if (!content) return null;
+
+        return {
+          role: msg.role as "user" | "assistant",
+          content: content,
+        };
+      })
+      .filter(Boolean) as ChatCompletionMessageParam[]),
+    {
+      role: "user",
+      content: message,
+    },
+  ];
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: fullMessages,
+    temperature: 0.7,
+    max_tokens: 512,
+    top_p: 1,
+  });
+
+  const assistantMessageContent = completion.choices[0].message.content || "";
+
+  await saveChatMessage(
+    chatId || completion.id,
+    assistantMessageContent,
+    message
+  );
+
+  return {
+    role: "assistant",
+    content: assistantMessageContent,
+    id: chatId || completion.id,
+  };
 };
 
 const getRelevantContext = async (
@@ -44,52 +112,6 @@ const getRelevantContext = async (
     })
     .filter(Boolean)
     .join("\n\n");
-};
-
-export const getChatResponse = async (
-  messages: ChatCompletionMessageParam[],
-  req: Request
-): Promise<ChatResponse> => {
-  const lastUserMessage = messages[messages.length - 1]?.content || "";
-
-  const systemPrompt = getPrompts();
-  
-  const fullMessages: ChatCompletionMessageParam[] = [
-    {
-      role: "system",
-      content: systemPrompt,
-    },
-    ...trimMessages(messages),
-  ];
-
-  const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: fullMessages,
-    temperature: 0.7,
-    max_tokens: 512,
-    top_p: 1,
-  });
-
-  const assistantMessageContent = completion.choices[0].message.content || "";
-
-  const choice: Message[] = [
-    {
-      role: "assistant",
-      content: assistantMessageContent,
-    },
-    {
-      role: "user",
-      content: lastUserMessage as string,
-    }
-  ]
-
-  saveChatMessage(completion.id, req.ip as string, choice);
-
-  return {
-    role: "assistant",
-    content: assistantMessageContent,
-    id: completion.id,
-  };
 };
 
 const getEmbedding = async (input: string): Promise<number[]> => {

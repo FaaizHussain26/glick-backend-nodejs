@@ -2,27 +2,32 @@ import Chat from "../database/models/chats";
 
 export type Message = {
   role: string;
-  content: string;
+  message: string; 
+  timestamp: Date;
 };
 
 const saveChatMessage = async (
   conversationId: string,
-  ip: string | string[],
-  messages: Message | Message[] 
+  aiResponse: string,
+  userMessage: string
 ) => {
   try {
-    const newMessages = Array.isArray(messages) ? messages : [messages];
-
-    let chat = await Chat.findOne({ ip: ip });
+    let chat = await Chat.findOne({ chatId: conversationId });
 
     if (!chat) {
       chat = new Chat({
-        ip: ip,
         chatId: conversationId,
-        choices: newMessages,
+        choices: [
+          { role: "user", messages: userMessage, timestamp: new Date() },
+          { role: "assistant", messages: aiResponse, timestamp: new Date() },
+        ],
       });
     } else {
-      chat.choices = [...(chat.choices || []), ...newMessages];
+      chat.choices = chat.choices || [];
+      chat.choices.push(
+        { role: "user", messages: userMessage, timestamp: new Date() },
+        { role: "assistant", messages: aiResponse, timestamp: new Date() }
+      );
       chat.updatedAt = new Date();
     }
 
@@ -32,5 +37,5 @@ const saveChatMessage = async (
     throw error;
   }
 };
-
 export { saveChatMessage };
+
