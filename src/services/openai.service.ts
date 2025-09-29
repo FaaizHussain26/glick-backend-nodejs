@@ -39,13 +39,14 @@ export const getChatResponse = async (
     }
   }
 
+
   const fullMessages: ChatCompletionMessageParam[] = [
     { role: "system", content: getPrompts(history) },
     ...(history
       .map((msg) => {
         let content =
           msg.message ||
-          (Array.isArray(msg.messages) ? msg.messages[0] : "") ||
+          (Array.isArray(msg.messages) ? msg.messages[0] : msg.messages) ||
           "";
 
         if (!content) return null;
