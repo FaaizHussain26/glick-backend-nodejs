@@ -7,7 +7,6 @@ const chatRouter = express.Router();
 chatRouter.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { messages, chatId } = req.body;
-    console.log(req.body);
     if (!messages || messages.length === 0) {
       res.status(400).json({ error: "Messages are required" });
       return;
