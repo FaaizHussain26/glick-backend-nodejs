@@ -56,6 +56,27 @@ If someone asks about residential, kindly explain this, and suggest they provide
 so we may refer them if possible.
 `;
 
+const linksInfo = `
+WEBSITE LINKS: 
+https://www.glickroofingsystems.com/
+https://www.glickroofingsystems.com/blog/
+https://www.glickroofingsystems.com/residential/
+https://www.glickroofingsystems.com/commercial/
+https://www.glickroofingsystems.com/gallery/
+https://www.glickroofingsystems.com/about/
+https://www.glickroofingsystems.com/contact/
+https://www.glickroofingsystems.com/faq/
+https://www.glickroofingsystems.com/reviews/
+https://www.glickroofingsystems.com/resources/
+https://www.glickroofingsystems.com/commercial-roof-repair-maintenance/
+https://www.glickroofingsystems.com/commercial-roof-replacement/
+https://www.glickroofingsystems.com/commercial-roof-restoration/
+https://www.glickroofingsystems.com/industrial-metal-warehouses/
+https://www.glickroofingsystems.com/ballpark-estimator/
+https://www.glickroofingsystems.com/privacy-policy/
+https://www.glickroofingsystems.com/monthly-promotions/
+`
+
 const getPrompts = (history?: any[]) => {
   let hasContactInfo = false;
   let userName = "";
@@ -124,6 +145,10 @@ ${areaInfo}
 
 SERVICE SCOPE:
 ${serviceScopeInfo}
+
+LINKS:
+${linksInfo}
+
 `.trim();
   } else {
     return `
@@ -153,6 +178,10 @@ ${areaInfo}
 
 SERVICE SCOPE:
 ${serviceScopeInfo}
+
+LINKS:
+${linksInfo}
+
 `.trim();
   }
 };
