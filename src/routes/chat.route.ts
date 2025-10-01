@@ -45,4 +45,14 @@ chatRouter.get(
   }
 );
 
+chatRouter.get('/histories', async (req: Request, res: Response): Promise<void> => {
+  try {
+      const history = await Chat.find().sort({ createdAt: -1 });
+      res.json(history);
+  } catch (error) {
+      console.error("Chat history error:", error);
+      res.status(500).json({ error: "Failed to fetch chat history" });
+  }
+})
+
 export default chatRouter;
