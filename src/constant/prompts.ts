@@ -81,32 +81,57 @@ https://www.glickroofingsystems.com/monthly-promotions/
 const getPrompts = (history?: any[]) => {
   let hasContactInfo = false;
   let userName = "";
+  let userPhone ="";
 
   if (history && history.length > 0) {
     const recentUserMessages = history
       .filter((msg) => msg.role === "user")
       .slice(-10);
 
-    hasContactInfo = recentUserMessages.some((msg) => {
+    for (const msg of recentUserMessages) {
       const content = msg.message || msg.messages || "";
-      const lowerContent = content.toString().toLowerCase();
+      const lowerContent = content.toLowerCase();
 
-      return (
-        /\+?\d{7,15}/.test(content) || // phone
-        (/(name|my name|i'm|i am)/i.test(content) && content.length > 10)
-      );
-    });
+      // Phone regex (flexible: +, -, (), spaces, 7–15 digits)
+      const phoneRegex = /(\+?\d[\d\-\s()]{7,15}\d)/;
+      const phoneMatch = content.match(phoneRegex);
 
-    const nameMessage = recentUserMessages.find((msg) => {
-      const content = msg.message || msg.messages || "";
-      return /(?:name|i'm|i am|this is)\s+([a-z]+)/i.test(content);
-    });
+      // Name regex (handles "my name is Shaheer", "I'm Shaheer", "Shaheer here", etc.)
+      const nameRegex =
+        /(?:name\s*is|i[' ]?m|i am|this is)?\s*([A-Za-z]{2,})(?=\s|$)/i;
+      const nameMatch = content.match(nameRegex);
 
-    if (nameMessage) {
-      const match = (nameMessage.message || nameMessage.messages).match(
-        /(?:name|i'm|i am|this is)\s+([a-z]+)/i
-      );
-      userName = match ? match[1] : "";
+      // ✅ If both are present in the same message
+      if (phoneMatch && nameMatch) {
+        userPhone = phoneMatch[1];
+        userName = nameMatch[1];
+        hasContactInfo = true;
+        break;
+      }
+
+      // ✅ If only phone present, guess name as the last word before phone
+      if (phoneMatch && !nameMatch) {
+        userPhone = phoneMatch[1];
+        const beforePhone = content.split(phoneMatch[1])[0].trim().split(/\s+/).pop();
+        if (beforePhone && /^[A-Za-z]+$/.test(beforePhone)) {
+          userName = beforePhone;
+        }
+        if (userName) {
+          hasContactInfo = true;
+          break;
+        }
+      }
+
+      // ✅ If only name present
+      if (nameMatch && !phoneMatch) {
+        userName = nameMatch[1];
+        // Keep checking next messages for phone
+      }
+    }
+
+    // ✅ Final check: if we found both across messages
+    if (userName && userPhone) {
+      hasContactInfo = true;
     }
   }
 
@@ -158,8 +183,13 @@ LINKS:
 ${linksInfo}
 
 WEBSITE LINK FORMATTING:
-When sharing website links, always format them as clean, clickable links. Use the format: "You can find more information at [page name]: [URL]"
-Example: "You can find more information about our services at: https://www.glickroofingsystems.com/commercial/"
+- When sharing website links, always format them as clean, clickable links. Use the format: "You can find more information at: URL"
+- Example: "You can find more information about our services at: https://www.glickroofingsystems.com/commercial/"
+
++ IMPORTANT: Do NOT use Markdown link formatting (no [text](url)).  
++ Always show the raw URL only.  
++ Correct: "You can find more information at: https://www.glickroofingsystems.com/commercial/"  
++ Incorrect: "You can find more information at: [https://www.glickroofingsystems.com/commercial/](https://www.glickroofingsystems.com/commercial/)"
 `.trim();
   } else {
     return `
@@ -211,8 +241,13 @@ LINKS:
 ${linksInfo}
 
 WEBSITE LINK FORMATTING:
-When sharing website links, always format them as clean, clickable links. Use the format: "You can find more information at [page name]: [URL]"
-Example: "You can find more information about our services at: https://www.glickroofingsystems.com/commercial/"
+- When sharing website links, always format them as clean, clickable links. Use the format: "You can find more information at: URL"
+- Example: "You can find more information about our services at: https://www.glickroofingsystems.com/commercial/"
+
++ IMPORTANT: Do NOT use Markdown link formatting (no [text](url)).  
++ Always show the raw URL only.  
++ Correct: "You can find more information at: https://www.glickroofingsystems.com/commercial/"  
++ Incorrect: "You can find more information at: [https://www.glickroofingsystems.com/commercial/](https://www.glickroofingsystems.com/commercial/)"
 
 Always respond in English - do not answer in any other language.
 `.trim();
