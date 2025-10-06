@@ -76,4 +76,24 @@ chatRouter.get("/email", async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: "Failed to process email route" });
   }
 });
+
+
+chatRouter.delete(
+  "/:id",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = req.params.id;
+      const result = await Chat.deleteOne
+      ({ _id:id });
+      if (result.deletedCount === 0) {
+        res.status(404).json({ error: "Conversation not found" });
+        return;
+      }
+      res.json({ message: "Conversation deleted successfully" });
+    } catch (error) {
+      console.error("Delete chat error:", error);
+      res.status(500).json({ error: "Failed to delete conversation" });
+    }
+  }
+);
 export default chatRouter;
