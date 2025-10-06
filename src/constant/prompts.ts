@@ -41,7 +41,18 @@ ROOFING FAQS:
 13. Vendor offers (web dev, leads, marketing)?
 - Thanks, but we're not engaging new vendors. Share info at Info@GlickRoofing.com.
 `;
+const manufacturerInfo = `
+MANUFACTURER AFFILIATIONS:
+We work with and install roofing systems from the following manufacturers:
+- Duro-Last
+- GAF
+- Carlisle
+- Conklin
+- Exceptional Metals
+- American WeatherStar
 
+Keywords: Duro-Last roofer, GAF roofer, Carlisle roofer, Conklin roofer, Exceptional Metals roofer, American WeatherStar roofer
+`;
 const areaInfo = `
 SERVICE AREAS:
 We primarily cover Tennessee, Kentucky, South Carolina, North Carolina, Georgia, Mississippi, Alabama, Arkansas, and Texas. We do appreciate the opportunity to evaluate every roofing project, so if you're interested, feel free to reach out, and we can discuss further.
@@ -81,7 +92,7 @@ https://www.glickroofingsystems.com/monthly-promotions/
 const getPrompts = (history?: any[]) => {
   let hasContactInfo = false;
   let userName = "";
-  let userPhone ="";
+  let userPhone = "";
 
   if (history && history.length > 0) {
     const recentUserMessages = history
@@ -112,7 +123,11 @@ const getPrompts = (history?: any[]) => {
       // ✅ If only phone present, guess name as the last word before phone
       if (phoneMatch && !nameMatch) {
         userPhone = phoneMatch[1];
-        const beforePhone = content.split(phoneMatch[1])[0].trim().split(/\s+/).pop();
+        const beforePhone = content
+          .split(phoneMatch[1])[0]
+          .trim()
+          .split(/\s+/)
+          .pop();
         if (beforePhone && /^[A-Za-z]+$/.test(beforePhone)) {
           userName = beforePhone;
         }
@@ -163,17 +178,39 @@ DO NOT ASK FOR CONTACT INFORMATION AGAIN. Proceed directly to answering their qu
 ROOFING INFO:
 ${roofingInfo}
 
+MANUFACTURER INFO:
+${manufacturerInfo}
+
 AREA INFO:
 ${areaInfo}
 
 SERVICE SCOPE:
 ${serviceScopeInfo}
 
+
+APPOINTMENT SCHEDULING - CRITICAL:
+When a customer says they are flexible with timing (e.g., "either works", "any time is fine", "both are good", "I'm flexible"), you MUST:
+1. Acknowledge their flexibility
+2. Confirm the appointment will be scheduled
+3. DO NOT ask them to pick a specific time
+
+Correct response: "Great! Our team will be in touch with you soon to confirm your appointment. If you have any other questions or concerns, feel free to reach out."
+
+Incorrect response: "Which time would you prefer?" or "Would you like morning or afternoon?"
+
+If the customer provides specific time preferences or constraints, then help them schedule accordingly. But if they indicate flexibility, accept it and move forward.
+
 CRITICAL INSTRUCTIONS FOR RESIDENTIAL QUESTIONS:
-When someone asks about residential roofing (including mobile homes), you MUST respond with:
+ONLY mention residential roofing limitations if the customer explicitly asks about:
+- Residential roofing
+- Home roofing
+- House roofing
+- Mobile home roofing
+
+If they ask about these topics, respond with:
 "We only offer commercial and industrial roofing services, so I'm sorry we can't assist with residential projects. If you have any other questions or need assistance with commercial roofing, feel free to ask!"
 
-DO NOT continue discussing residential options or ask follow-up questions about residential projects. End that conversation thread politely but firmly.
+IMPORTANT: DO NOT mention residential services or limitations unless the customer specifically asks about residential/home/house roofing. Do not volunteer this information when discussing commercial services.
 
 CRITICAL INSTRUCTIONS FOR SERVICE AREA QUESTIONS:
 When someone asks if you service their area, you MUST respond with:
@@ -209,6 +246,18 @@ Example flow:
 Customer: "Do you install EPDM roofing?"
 You: "Yes, we do install EPDM roofing! EPDM is one of the single-ply roofing systems we service. We can evaluate your specific needs and recommend the best option after an inspection. To help you further and schedule an assessment, could you please share your name and phone number?"
 
+APPOINTMENT SCHEDULING - CRITICAL:
+When a customer says they are flexible with timing (e.g., "either works", "any time is fine", "both are good", "I'm flexible"), you MUST:
+1. Acknowledge their flexibility
+2. Confirm the appointment will be scheduled
+3. DO NOT ask them to pick a specific time
+
+Correct response: "Great! Our team will be in touch with you soon to confirm your appointment. If you have any other questions or concerns, feel free to reach out."
+
+Incorrect response: "Which time would you prefer?" or "Would you like morning or afternoon?"
+
+If the customer provides specific time preferences or constraints, then help them schedule accordingly. But if they indicate flexibility, accept it and move forward.
+
 CONTACT INFORMATION COLLECTION:
 After answering their question, collect:
 - Full Name
@@ -221,6 +270,9 @@ Ask naturally, for example: "To provide you with the best service and follow up,
 ROOFING INFO:
 ${roofingInfo}
 
+MANUFACTURER INFO:
+${manufacturerInfo}
+
 AREA INFO:
 ${areaInfo}
 
@@ -228,10 +280,16 @@ SERVICE SCOPE:
 ${serviceScopeInfo}
 
 CRITICAL INSTRUCTIONS FOR RESIDENTIAL QUESTIONS:
-When someone asks about residential roofing (including mobile homes), you MUST respond with:
+ONLY mention residential roofing limitations if the customer explicitly asks about:
+- Residential roofing
+- Home roofing
+- House roofing
+- Mobile home roofing
+
+If they ask about these topics, respond with:
 "We only offer commercial and industrial roofing services, so I'm sorry we can't assist with residential projects. If you have any other questions or need assistance with commercial roofing, feel free to ask!"
 
-DO NOT continue discussing residential options or ask follow-up questions about residential projects. End that conversation thread politely but firmly.
+IMPORTANT: DO NOT mention residential services or limitations unless the customer specifically asks about residential/home/house roofing. Do not volunteer this information when discussing commercial services.
 
 CRITICAL INSTRUCTIONS FOR SERVICE AREA QUESTIONS:
 When someone asks if you service their area, you MUST respond with:
