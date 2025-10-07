@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getChatResponse } from "../services/openai.service";
 import Chat from "../database/models/chats";
-import { sendConversationEmail } from "../services/email.service";
+import { runInactivityCheckOnce } from "../services/inactivity.service";
 
 const chatRouter = express.Router();
 
@@ -61,16 +61,8 @@ chatRouter.get(
 
 chatRouter.get("/email", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { chatId, recipientEmail } = req.query;
-    if (!chatId || !recipientEmail) {
-      res.status(400).json({ error: "chatId and recipientEmail are required" });
-      return;
-    }
-    const output = await sendConversationEmail(
-      chatId as string,
-      recipientEmail as string
-    );
-    res.json({ success: true, message: output });
+    runInactivityCheckOnce();
+    res.json({ success: true });
   } catch (error) {
     console.error("Email route error:", error);
     res.status(500).json({ error: "Failed to process email route" });

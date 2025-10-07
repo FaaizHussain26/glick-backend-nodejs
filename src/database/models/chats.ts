@@ -10,6 +10,11 @@ const chatSchema = new mongoose.Schema({
     type: Array,
     required: false,
   },
+  isEmail:{
+    type: Boolean,
+    default: false,
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now,
