@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import connectDB from "./database";
 import chatRouter from "./routes/chat.route";
+import { startInactivityChecker } from "./services/inactivity.service";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -13,6 +14,8 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 connectDB();
+
+ startInactivityChecker();
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,

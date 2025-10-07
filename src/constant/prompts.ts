@@ -107,7 +107,7 @@ const getPrompts = (history?: any[]) => {
       const phoneRegex = /(\+?\d[\d\-\s()]{7,15}\d)/;
       const phoneMatch = content.match(phoneRegex);
 
-      // Name regex (handles "my name is Shaheer", "I'm Shaheer", "Shaheer here", etc.)
+  
       const nameRegex =
         /(?:name\s*is|i[' ]?m|i am|this is)?\s*([A-Za-z]{2,})(?=\s|$)/i;
       const nameMatch = content.match(nameRegex);

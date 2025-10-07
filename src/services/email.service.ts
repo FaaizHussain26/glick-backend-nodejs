@@ -2,7 +2,7 @@ import { transporter } from "../constant/email-config";
 import Chat from "../database/models/chats";
 import { generateConversationHTML } from "../constant/converstion.template";
 
-async function sendConversationEmail(chatId: string, recipientEmail: string) {
+async function sendConversationEmail(chatId: string) {
   try {
     const chat = await Chat.findOne({ chatId });
     if (!chat) throw new Error("Chat not found");
@@ -11,15 +11,21 @@ async function sendConversationEmail(chatId: string, recipientEmail: string) {
 
     const mailOptions = {
       from: process.env.BREVO_USER,
-      to: recipientEmail,
+      to: process.env.EMAIL_SEND_TO,
       subject: `Chat Conversation - ${chatId}`,
       html: htmlContent,
     };
 
     await transporter.sendMail(mailOptions);
-    return "Email Sent Successfully!";
+    return {
+      success: true,
+      messageId: "Email Sent Successfully!",
+    };
   } catch (error) {
-    console.error("Error sending email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
