@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import connectDB from "./database";
 import chatRouter from "./routes/chat.route";
+import knowledgeRouter from "./routes/knowledge.routes";
 import { startInactivityChecker } from "./services/inactivity.service";
 
 dotenv.config();
@@ -40,6 +41,7 @@ const options = [
 app.use(options);
 
 app.use("/api/chat", chatRouter);
+app.use("/api/knowledge", knowledgeRouter);
 
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
