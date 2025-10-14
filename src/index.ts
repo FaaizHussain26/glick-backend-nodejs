@@ -8,6 +8,7 @@ import connectDB from "./database";
 import chatRouter from "./routes/chat.route";
 import knowledgeRouter from "./routes/knowledge.routes";
 import { startInactivityChecker } from "./services/inactivity.service";
+import chatbotRouter from "./routes/chatbot.route";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -42,6 +43,7 @@ app.use(options);
 
 app.use("/api/chat", chatRouter);
 app.use("/api/knowledge", knowledgeRouter);
+app.use("/api/chatbot", chatbotRouter);
 
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
