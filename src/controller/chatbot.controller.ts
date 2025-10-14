@@ -1,43 +1,41 @@
-import { Request, Response } from "express";
-import { KnowledgeService } from "../services/knowlege/knowlege.service";
 import fs from "fs";
+import { Request, Response } from "express";
+import { ChatbotService } from "../services/chatbot.service";
 
-export class KnowledgeController {
-  static async upload(req: Request, res: Response) {
+export class ChatbotController {
+  static async create(req: Request, res: Response) {
     try {
-      const { title, chatbotId } = req.body;
-      if (!title || !chatbotId) {
+      const { title, subTitle, firstMessage, colorCode } = req.body;
+      if (!title || !subTitle || !colorCode) {
         if (req.file) {
           fs.unlinkSync(req.file.path);
         }
-        return res
-          .status(400)
-          .json({ error: "title and chatbot_id are required" });
+        return res.status(400).json({ error: "Field are required" });
       }
 
       if (!req.file) {
         return res.status(400).json({ error: "File is required" });
       }
 
-      const result = await KnowledgeService.createKnowledge(
+      const result = await ChatbotService.createChatbot(
         title,
-        chatbotId,
-        req.file
+        subTitle,
+        colorCode,
+        req.file,
+        firstMessage
       );
 
       if (result.error) {
-        if (req.file) {
-          fs.unlinkSync(req.file.path);
-        }
         return res.status(200).json({
-          data: result.knowledge,
+          message: "File stored but db save failed",
+          data: result.newChatbot,
           error: result.error,
         });
       }
 
       return res.status(201).json({
-        message: "Knowledge created successfully",
-        data: result.knowledge,
+        message: "chatbot created successfully",
+        data: result.newChatbot,
       });
     } catch (error) {
       console.error(error);
@@ -46,12 +44,12 @@ export class KnowledgeController {
   }
 
   static async getAll(req: Request, res: Response) {
-    const data = await KnowledgeService.getAll();
+    const data = await ChatbotService.getAll();
     res.json(data);
   }
 
   static async getById(req: Request, res: Response) {
-    const data = await KnowledgeService.getById(req.params.id);
+    const data = await ChatbotService.getById(req.params.id);
     if (!data) return res.status(404).json({ error: "Not found" });
     res.json(data);
   }
@@ -59,26 +57,23 @@ export class KnowledgeController {
   static async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { title, chatbotId } = req.body;
+      const { title, subTitle, firstMessage, colorCode } = req.body;
 
       const updates: any = {};
       if (title) updates.title = title;
-      if (chatbotId) updates.chatbotId = chatbotId;
-      if (req.file) {
-        updates.file = req.file;
-      }
+      if (subTitle) updates.subTitle = subTitle;
+      if (firstMessage) updates.firstMessage = firstMessage;
+      if (colorCode) updates.colorCode = colorCode;
+      if (req.file) updates.file = req.file;
 
-      const updated = await KnowledgeService.updateKnowledge(id, updates);
-
+      const updated = await ChatbotService.updateChatbot(id, updates);
       res.json({
-        message: "Knowledge updated successfully",
+        message: "chatbot updated successfully",
         data: updated,
       });
     } catch (error) {
       console.error(error);
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
+
       res.status(500).json({ error: (error as Error).message });
     }
   }
@@ -86,8 +81,8 @@ export class KnowledgeController {
   static async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await KnowledgeService.deleteKnowledge(id);
-      res.json({ message: "Knowledge deleted successfully" });
+      await ChatbotService.deleteChatbot(id);
+      res.json({ message: "chatbot deleted successfully" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: (error as Error).message });
