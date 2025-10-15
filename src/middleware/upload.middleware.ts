@@ -2,9 +2,10 @@ import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 
+const uploadPath = "/app/tmp";
 
 export function fileupload(filelocation: string) {
-const uploadDir = path.join(__dirname, `../tmp/${filelocation}`);
+const uploadDir = path.join(uploadPath, `${filelocation}`);
 
 const storage = multer.diskStorage({
   destination: async (_req, _file, cb) => {
