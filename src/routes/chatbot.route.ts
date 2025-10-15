@@ -5,12 +5,12 @@ import { ChatbotController } from "../controller/chatbot.controller";
 
 const router = Router();
 
-router.post("/", fileupload("images").single("file"), ChatbotController.create);
+router.post("/", fileupload().single("file"), ChatbotController.create);
 router.get("/", ChatbotController.getAll);
 router.get("/:id", ChatbotController.getById);
 router.put(
   "/:id",
-  fileupload("images").single("file"),
+  fileupload().single("file"),
   ChatbotController.update
 );
 router.delete("/:id", ChatbotController.delete);

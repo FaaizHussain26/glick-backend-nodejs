@@ -6,6 +6,7 @@ import Chat from "../database/models/chats";
 import { saveChatMessage } from "./chat.service";
 import { error } from "console";
 import { chatbot } from "../database/models/chatbot";
+import { Knowledge } from "../database/models/knowlodge";
 
 export interface ChatResponse {
   role: "assistant";
@@ -36,11 +37,11 @@ export const getChatResponse = async (
       };
     }
   } else {
-   return {
-        role: "assistant",
-        content: "chatbot Id does not exist",
-        id: "",
-      };
+    return {
+      role: "assistant",
+      content: "chatbot Id does not exist",
+      id: "",
+    };
   }
 
   if (chatId) {
@@ -58,9 +59,13 @@ export const getChatResponse = async (
       history = chat.choices;
     }
   }
+  const knowledge = await Knowledge.findOne({ chatbotId });
 
   const fullMessages: ChatCompletionMessageParam[] = [
-    { role: "system", content: getPrompts(history) },
+    {
+      role: "system",
+      content: getPrompts(history, String(knowledge?.promptContent)),
+    },
     {
       role: "user",
       content: message,

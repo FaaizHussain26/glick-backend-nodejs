@@ -12,39 +12,35 @@ export class KnowledgeService {
     chatbotId: mongoose.Types.ObjectId,
     file: Express.Multer.File
   ) {
-    if (!mongoose.Types.ObjectId.isValid(chatbotId)) {
-      return { error: "Invalid chatbot ID format" };
-    }
-
-    const existChatbot = await chatbot.findOne({ _id: chatbotId });
-    if (!existChatbot) {
-      await fs.unlink(file.path).catch(() => {});
-      throw new Error("Chatbot not found");
-    }
-
-    const knowledge = await Knowledge.create({
-      title,
-      chatbotId,
-      extractionStatus: "pending",
-      originalFileName: file.filename,
-      originalFilePath: file.path,
-    });
-
     try {
+      if (!mongoose.Types.ObjectId.isValid(chatbotId)) {
+        return { error: "Invalid chatbot ID format" };
+      }
+
+      const existChatbot = await chatbot.findOne({ _id: chatbotId });
+      if (!existChatbot) {
+        await fs.unlink(file.path).catch(() => {});
+        return { error: "Chatbot not found" };
+      }
+
       const text = await extractText(file.path, file.filename);
+      if (!text || text === "Unsupported or empty file") {
+        return { error: "Unsupported or empty file" };
+      }
       const prompt = await generatePrompt(text);
-
-      knowledge.promptContent = prompt;
-      knowledge.extractionStatus = "succeeded";
+      const knowledge = await Knowledge.create({
+        title,
+        chatbotId,
+        extractionStatus: "succeeded",
+        originalFileName: file.filename,
+        originalFilePath: file.path,
+        promptContent: prompt,
+      });
       await knowledge.save();
-
       await fs.unlink(file.path).catch(() => {});
       return { knowledge };
     } catch (err) {
-      knowledge.extractionStatus = "failed";
-      knowledge.originalFilePath = file.path;
-      await knowledge.save();
-      return { knowledge, error: (err as Error).message };
+      return { error: (err as Error).message };
     }
   }
 
@@ -94,7 +90,7 @@ export class KnowledgeService {
         knowledge.originalFilePath = updates.file.path;
         // if there's an old unprocessed file, remove it from disk
         if (knowledge.originalFilePath) {
-          await fs.unlink(knowledge.originalFilePath).catch(() => {});    
+          await fs.unlink(knowledge.originalFilePath).catch(() => {});
         }
 
         // delete file after success
