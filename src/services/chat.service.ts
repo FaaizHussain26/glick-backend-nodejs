@@ -1,3 +1,4 @@
+import { chatbot } from "../database/models/chatbot";
 import Chat from "../database/models/chats";
 
 export type Message = {
@@ -8,15 +9,17 @@ export type Message = {
 
 const saveChatMessage = async (
   conversationId: string,
+  chatbotId: string,
   aiResponse: string,
   userMessage: string
 ) => {
   try {
-    let chat = await Chat.findOne({ chatId: conversationId });
+    let chat = await Chat.findOne({ chatId: conversationId , chatbotId: chatbotId });
 
     if (!chat) {
       chat = new Chat({
         chatId: conversationId,
+        chatbotId: chatbotId,
         choices: [
           { role: "user", messages: userMessage, timestamp: new Date() },
           { role: "assistant", messages: aiResponse, timestamp: new Date() },

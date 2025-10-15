@@ -5,10 +5,12 @@ import getPrompts from "../constant/prompts";
 import Chat from "../database/models/chats";
 import { saveChatMessage } from "./chat.service";
 import { error } from "console";
+import { chatbot } from "../database/models/chatbot";
 
 export interface ChatResponse {
   role: "assistant";
   content: string;
+  chatbotId?: string;
   id: string;
 }
 
@@ -20,16 +22,34 @@ const trimMessages = (messages: ChatCompletionMessageParam[]) => {
 
 export const getChatResponse = async (
   message: string,
+  chatbotId: string,
   chatId?: string
 ): Promise<ChatResponse> => {
   let history = [];
+  if (chatbotId) {
+    const existChatbot = chatbot.findOne({ _id: chatbotId });
+    if (!existChatbot) {
+      return {
+        role: "assistant",
+        content: "chatbot Id does not exist",
+        id: chatId || "",
+      };
+    }
+  } else {
+   return {
+        role: "assistant",
+        content: "chatbot Id does not exist",
+        id: "",
+      };
+  }
 
   if (chatId) {
-    const chat = await Chat.findOne({ chatId });
+    const chat = await Chat.findOne({ chatId, chatbotId });
     if (!chat) {
       return {
         role: "assistant",
         content: "chat Id does not exist",
+        chatbotId: chatbotId,
         id: chatId,
       };
     }
@@ -59,6 +79,7 @@ export const getChatResponse = async (
 
   await saveChatMessage(
     chatId || completion.id,
+    chatbotId,
     assistantMessageContent,
     message
   );
@@ -66,6 +87,7 @@ export const getChatResponse = async (
   return {
     role: "assistant",
     content: assistantMessageContent,
+    chatbotId: chatbotId,
     id: chatId || completion.id,
   };
 };

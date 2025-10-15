@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
+import { chatbot } from "./chatbot";
 
 const chatSchema = new mongoose.Schema({
   chatId: {
+    type: String,
+    required: true,
+  },
+
+  chatbotId: {
     type: String,
     required: true,
   },
@@ -10,11 +16,11 @@ const chatSchema = new mongoose.Schema({
     type: Array,
     required: false,
   },
-  isEmail:{
+  isEmail: {
     type: Boolean,
     default: false,
   },
-  
+
   createdAt: {
     type: Date,
     default: Date.now,
